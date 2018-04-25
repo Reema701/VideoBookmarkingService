@@ -1,0 +1,247 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>Video BookMarking Service</title>
+<meta name="description" content="Page description goes here">
+
+<!-- ******************************************************************************************
+Set the type and color theme here - the Pro version contains additional themes -->
+<link href="css/hawthorne_type2_color3.css" rel="stylesheet">
+<!--  ************************************************************************************* -->
+
+<link href="css/font-awesome.min.css" rel="stylesheet">
+<script src="js/vendor/modernizr.js"></script>
+
+</head>
+<body>
+
+<div class="top-border"></div>
+
+<div class="row">
+	<div class="small-12 medium-12 large-12 small-centered columns">
+		<header>		
+			<h1><a href="index.html">Video BookMarking Service</a></h1>
+			<h2><a href="index.html">Bookmark & organize videos of interest to watch later on any platform.</a></h2>
+			<h2><a href="index.html">Pause on one device and resume on any other.</a></h2>
+			<!--
+			<div class="logo">
+				<a href="index.html"><img src="img/logo.png" alt="Your Name Here" /></a>
+			</div>
+			-->
+		</header>
+	</div>
+</div>
+
+
+<div class="row">
+	<div class="small-12 columns-123">
+		<ul class="small-block-grid-1234 inline-list-custom">
+			
+			<!-- Begin project -->
+			<li>
+				<div class="button">
+					<div> <input type="button" value="Submit Bookmark" onclick="bookMarkCurTime(); return false;" name="bookmarkSet"> </div>
+				</div>
+			</li>
+			<!-- End project -->
+			<!-- Begin project -->
+			<!--<li>
+				<div class="button">
+					<div> <input type="button" value="Play From Bookmark" onclick="return getBookMarkTime();" name="bookmarkGet"> </div>
+				</div>
+			</li>
+			<!-- End project -->
+		</ul>
+	</div>
+</div>
+
+<div class="row">
+	<div class="small-12 medium-12 large-12 columns">
+		<hr class="project-detail-hr" />
+		
+		<!-- Begin project image -->
+		<div class="project-img">
+			<!-- <img src="img/projects/project-01a.png" alt="Project 01a" />
+			<h6>Project 01a Caption</h6> -->
+			<h1 id="vidTitle"></h1>
+			<video  id="video" controls width="1080" height="640">
+				<source id="mp4" type="video/mp4" >
+				Your browser does not support HTML5 video.
+			</video>
+			<!--
+			<script>
+				vidName = sessionStorage.getItem('vid');
+				if (vidName == null)
+				{
+					vidName = "Primetime";
+				}
+			
+				var video = document.getElementById('video');
+				var vidSrc = document.getElementById("mp4");
+				mp4.src = "/gw/vid/" + vidName + ".mp4";
+				
+				//video.load();
+				//video.play();
+				getBookMarkTime();
+			</script>		
+-->			
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="small-12 medium-12 large-12 columns">
+		<footer>
+			<ul>
+				<!-- *****************************************************************************************
+				The "Powered by Type & Grids" link in the footer is required in the Free version
+				typeandgrids.com/pirates -->
+				<li>Powered by <a href="http://www.typeandgrids.com" target="_blank">Type &amp; Grids</a></li>
+				<!--  ************************************************************************************ -->
+				
+			</ul>
+		</footer>
+	</div>
+</div>
+<script>
+myVid=document.getElementById("video");
+vidName = sessionStorage.getItem('vid');
+alert(vidName);
+if (vidName == null)
+{
+	vidName = "Primetime";
+}
+
+var video = document.getElementById('video');
+var vidSrc = document.getElementById("mp4");
+var vT = document.getElementById("vidTitle");
+mp4.src = "/gw/vid/" + vidName + ".mp4";
+
+vT.innerHTML = vidName;
+video.load();
+video.play();
+getBookMarkTime();
+
+ /****************************************************************************************/
+ /***********************Set Bookmarked Time*********************************************/
+ /****************************************************************************************/
+ 
+//Function to bookmark current Time
+function bookMarkCurTime()
+  { 
+  val=myVid.currentTime;
+  vidName = sessionStorage.getItem('vid');
+  
+	if( val != 0)
+	{
+		//alert("bookmarked! @" + val);
+		myVid.pause();
+		//myVid.currentTime = 0;
+		alert("After pause, bookmark time : @" + val);
+ 
+		//sending value of var to php file
+		var xmlhttp;
+		if (window.XMLHttpRequest)
+			{// code for IE7+, Firefox, Chrome, Opera, Safari
+				xmlhttp=new XMLHttpRequest();
+			}
+		else
+			{// code for IE6, IE5
+				xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+			}
+		xmlhttp.open("GET","connectivity.php?vid="+vidName+"&tm="+val,true);
+		xmlhttp.onreadystatechange = function()
+		
+		{
+			if(xmlhttp.readyState==4 && xmlhttp.status==200)
+				{
+					console.log("success")
+				}
+		}
+		xmlhttp.send();
+	}
+	else
+	{
+		alert("Bookmark @ beginning of video not honored.");
+	}	
+	
+	return false;
+  }
+ 
+ /****************************************************************************************/
+ /***********************Get Bookmarked Time*********************************************/
+ /****************************************************************************************/
+ 
+//Function to get bookmarked Time
+function getBookMarkTime() {
+  getRequest(
+      'getBookmark.php?vid='+vidName, // URL for the PHP file
+       drawOutput,  // handle successful request
+       drawError    // handle error
+  );
+  return false;
+}  
+
+// handles drawing an error message
+function drawError () {
+    //var container = document.getElementById('output');
+    //container.innerHTML = 'Bummer: there was an error!';
+	alert("There was an error setting bookmark time.");
+}
+
+// handles the response, plays the video from responded time
+function drawOutput(responseText) {
+    //var container = document.getElementById('output');
+    //container.innerHTML = responseText;
+	myVid.currentTime = responseText;
+	if (responseText != 0)
+	{
+		alert("Playing from bookmarked time..." + responseText);
+	}
+	//myVid.play();
+	myvid.load();
+	//alert("Playing from bookmarked time...after responseText != 0 " + responseText);
+}
+// helper function for cross-browser request object
+function getRequest(url, success, error) {
+    var req = false;
+    try{
+        // most browsers
+        req = new XMLHttpRequest();
+    } catch (e){
+        // IE
+        try{
+            req = new ActiveXObject("Msxml2.XMLHTTP");
+        } catch (e) {
+            // try an older version
+            try{
+                req = new ActiveXObject("Microsoft.XMLHTTP");
+            } catch (e){
+                return false;
+            }
+        }
+    }
+    if (!req) return false;
+    if (typeof success != 'function') success = function () {};
+    if (typeof error!= 'function') error = function () {};
+    req.onreadystatechange = function(){
+        if(req .readyState == 4){
+            return req.status === 200 ? 
+                success(req.responseText) : error(req.status)
+            ;
+        }
+    }
+    req.open("GET", url, true);
+    req.send(null);
+    return req;
+}
+</script> 
+<script src="js/vendor/jquery.min.js"></script>
+<script src="js/foundation.min.js"></script>
+<script src="js/hawthorne.js"></script>
+
+</body>
+</html>
